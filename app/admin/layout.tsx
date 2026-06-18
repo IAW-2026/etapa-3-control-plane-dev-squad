@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
+import { useTheme } from "../../components/theme-provider";
 import {
   Users,
   ShoppingBag,
@@ -14,12 +14,16 @@ import {
   Sun,
   Moon,
   Shield,
+  MessageSquare,
+  Flag,
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin/usuarios", label: "Usuarios", icon: Users },
-  { href: "/admin/orders", label: "Ordenes", icon: ShoppingBag },
+  { href: "/admin/orders", label: "Órdenes", icon: ShoppingBag },
   { href: "/admin/products", label: "Productos", icon: Package },
+  { href: "/admin/resenas", label: "Reseñas", icon: MessageSquare },
+  { href: "/admin/reportes", label: "Reportes", icon: Flag },
 ];
 
 export default function AdminLayout({
@@ -38,7 +42,7 @@ export default function AdminLayout({
           collapsed ? "w-16" : "w-64"
         } bg-[var(--foreground)] text-[var(--background)] flex flex-col transition-all duration-200 shrink-0`}
       >
-        <div className="flex items-center gap-3 px-4 h-16 border-b border-[var(--border)] border-opacity-20">
+        <div className="flex items-center gap-3 px-4 h-16 border-b border-[var(--sidebar-border)]">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--background)] shrink-0">
             <Shield className="w-4 h-4 text-[var(--foreground)]" />
           </div>
@@ -63,7 +67,7 @@ export default function AdminLayout({
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                   isActive
                     ? "bg-[var(--background)] text-[var(--foreground)]"
-                    : "opacity-70 hover:opacity-100 hover:bg-[var(--background)] hover:bg-opacity-10"
+                    : "opacity-70 hover:opacity-100 hover:bg-[var(--sidebar-hover)]"
                 }`}
                 title={collapsed ? item.label : undefined}
               >
@@ -74,10 +78,10 @@ export default function AdminLayout({
           })}
         </nav>
 
-        <div className="px-2 py-3 border-t border-[var(--border)] border-opacity-20">
+        <div className="px-2 py-3 border-t border-[var(--sidebar-border)]">
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm opacity-70 hover:opacity-100 hover:bg-[var(--background)] hover:bg-opacity-10 transition-colors"
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm opacity-70 hover:opacity-100 hover:bg-[var(--sidebar-hover)] transition-colors cursor-pointer"
             title={collapsed ? (theme === "dark" ? "Modo claro" : "Modo oscuro") : undefined}
           >
             {theme === "dark" ? (
@@ -91,10 +95,10 @@ export default function AdminLayout({
           </button>
         </div>
 
-        <div className="px-2 py-3 border-t border-[var(--border)] border-opacity-20">
+        <div className="px-2 py-3 border-t border-[var(--sidebar-border)]">
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="flex items-center justify-center w-full px-3 py-2 rounded-lg opacity-70 hover:opacity-100 hover:bg-[var(--background)] hover:bg-opacity-10 transition-colors"
+            className="flex items-center justify-center w-full px-3 py-2 rounded-lg opacity-70 hover:opacity-100 hover:bg-[var(--sidebar-hover)] transition-colors cursor-pointer"
           >
             {collapsed ? (
               <ChevronRight className="w-5 h-5" />
@@ -104,8 +108,8 @@ export default function AdminLayout({
           </button>
         </div>
 
-        <div className="px-2 py-3 border-t border-[var(--border)] border-opacity-20">
-          <button className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm opacity-70 hover:opacity-100 hover:bg-[var(--background)] hover:bg-opacity-10 transition-colors">
+        <div className="px-2 py-3 border-t border-[var(--sidebar-border)]">
+          <button className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm opacity-70 hover:opacity-100 hover:bg-[var(--sidebar-hover)] transition-colors cursor-pointer">
             <LogOut className="w-5 h-5 shrink-0" />
             {!collapsed && <span>Cerrar sesión</span>}
           </button>
