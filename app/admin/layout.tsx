@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Truck } from "lucide-react";
 import { useTheme } from "../../components/theme-provider";
 import {
   Users,
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/admin/products", label: "Productos", icon: Package },
   { href: "/admin/resenas", label: "Reseñas", icon: MessageSquare },
   { href: "/admin/reportes", label: "Reportes", icon: Flag },
+  { href: "/admin/envios", label: "Envíos", icon: Truck },
 ];
 
 export default function AdminLayout({
