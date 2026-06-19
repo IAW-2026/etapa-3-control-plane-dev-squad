@@ -2,47 +2,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, MessageSquarePlus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { StatusBadge } from "../../../../components/shipments/StatusBadge";
+import { ShipmentItemsList } from "../../../../components/shipments/ShipmentItemsList";
+import { ShipmentHistory } from "../../../../components/shipments/ShipmentHistory";
+import { ShipmentStatusCard } from "../../../../components/shipments/ShipmentStatusCard";
+import { AddCommentCard } from "../../../../components/shipments/AddCommentCard";
+import { Shipment, TrackingItem } from "../../../../components/shipments/types";
 
 const API_KEY = process.env.NEXT_PUBLIC_LOGISTICS_API_KEY ?? "";
 const API_BASE = process.env.NEXT_PUBLIC_LOGISTICS_API_URL ?? "";
-
 const ORDER = ["PENDING", "PREPARING", "IN_TRANSIT", "DELIVERED"];
-
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: "Pendiente",
-  PREPARING: "En preparación",
-  IN_TRANSIT: "En camino",
-  DELIVERED: "Entregado",
-};
-
-type Shipment = {
-  id: number;
-  orderId: string;
-  buyerId: string;
-  status: string;
-  address: string;
-  carrier: string;
-  estimatedDeliveryDate: string | null;
-  deliveryDate: string | null;
-  createdAt: string;
-};
-
-type TrackingItem = {
-  id: number;
-  status: string;
-  description: string | null;
-  location: string;
-  timestamp: string;
-};
-
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--muted)] border border-[var(--border)]">
-      {STATUS_LABELS[status] ?? status}
-    </span>
-  );
-}
 
 export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
   const [shipment, setShipment] = useState<Shipment | null>(null);
@@ -51,6 +21,7 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
   const [error, setError] = useState<string | null>(null);
 
   const [comment, setComment] = useState("");
+  const [statusComment, setStatusComment] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
   const [submittingStatus, setSubmittingStatus] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -68,12 +39,11 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
         }),
       ]);
 
-      if (!shipmentRes.ok) throw new Error(`Error ${shipmentRes.status}`);
-      if (!trackingRes.ok) throw new Error(`Error ${trackingRes.status}`);
+      if (!shipmentRes.ok || !trackingRes.ok) throw new Error();
 
       setShipment(await shipmentRes.json());
       setTracking(await trackingRes.json());
-    } catch (e) {
+    } catch {
       setError("No se pudo cargar el envío.");
     } finally {
       setLoading(false);
@@ -88,8 +58,10 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
     ? ORDER[ORDER.indexOf(shipment.status) + 1]
     : undefined;
 
+  const originAddress = shipment?.items.find((item) => item.productOriginAddress)?.productOriginAddress ?? null;
+
   async function handleAdvanceStatus() {
-    if (!nextStatus) return;
+    if (!nextStatus || !statusComment.trim()) return;
     setSubmittingStatus(true);
     setActionError(null);
     try {
@@ -99,11 +71,15 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
           "Content-Type": "application/json",
           "x-api-key": API_KEY,
         },
-        body: JSON.stringify({ status: nextStatus }),
+        body: JSON.stringify({
+          status: nextStatus,
+          description: statusComment.trim(),
+        }),
       });
-      if (!res.ok) throw new Error(`Error ${res.status}`);
+      if (!res.ok) throw new Error();
+      setStatusComment("");
       await fetchAll();
-    } catch (e) {
+    } catch {
       setActionError("No se pudo actualizar el estado.");
     } finally {
       setSubmittingStatus(false);
@@ -111,7 +87,7 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
   }
 
   async function handleAddComment() {
-    if (!comment.trim()) return;
+    if (!comment.trim() || shipment?.status === "DELIVERED") return; // Protección extra en la función
     setSubmittingComment(true);
     setActionError(null);
     try {
@@ -123,19 +99,17 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
         },
         body: JSON.stringify({ description: comment.trim() }),
       });
-      if (!res.ok) throw new Error(`Error ${res.status}`);
+      if (!res.ok) throw new Error();
       setComment("");
       await fetchAll();
-    } catch (e) {
+    } catch {
       setActionError("No se pudo agregar el comentario.");
     } finally {
       setSubmittingComment(false);
     }
   }
 
-  if (loading) {
-    return <div className="text-sm opacity-40 py-10 text-center">Cargando...</div>;
-  }
+  if (loading) return <div className="text-sm opacity-40 py-10 text-center">Cargando...</div>;
 
   if (error || !shipment) {
     return (
@@ -149,15 +123,14 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <Link href="/admin/envios" className="text-sm opacity-60 hover:opacity-100 flex items-center gap-1 w-fit">
         <ArrowLeft className="w-4 h-4" /> Volver a envíos
       </Link>
 
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex items-center justify-between flex-wrap gap-3 pb-2">
         <div>
-          <h1 className="text-xl font-bold">Orden #{shipment.orderId}</h1>
-          <p className="text-sm opacity-60 mt-1">{shipment.address}</p>
+          <h1 className="text-2xl font-bold tracking-tight">Orden #{shipment.orderId}</h1>
         </div>
         <StatusBadge status={shipment.status} />
       </div>
@@ -168,82 +141,46 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
         </div>
       )}
 
-      <div className="rounded-xl border border-[var(--border)] p-5 space-y-4">
-        <div className="text-sm font-semibold">Estado del envío</div>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-          <div className="opacity-60">Carrier</div>
-          <div>{shipment.carrier === "MAIL" ? "Correo" : "Retiro en persona"}</div>
-          <div className="opacity-60">Entrega estimada</div>
-          <div>
-            {shipment.estimatedDeliveryDate
-              ? new Date(shipment.estimatedDeliveryDate).toLocaleDateString("es-AR")
-              : "—"}
-          </div>
-          <div className="opacity-60">Fecha de entrega</div>
-          <div>
-            {shipment.deliveryDate
-              ? new Date(shipment.deliveryDate).toLocaleDateString("es-AR")
-              : "—"}
-          </div>
-        </div>
-
-        {nextStatus ? (
-          <button
-            onClick={handleAdvanceStatus}
-            disabled={submittingStatus}
-            className="px-4 py-2 rounded-lg bg-[var(--foreground)] text-[var(--background)] text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {submittingStatus ? "Actualizando..." : `Avanzar a "${STATUS_LABELS[nextStatus]}"`}
-          </button>
-        ) : (
-          <div className="text-sm opacity-50">El envío ya fue entregado.</div>
-        )}
-      </div>
-
-      <div className="rounded-xl border border-[var(--border)] p-5 space-y-3">
-        <div className="text-sm font-semibold">Agregar comentario</div>
-        <div className="flex items-start gap-2">
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Escribí una novedad sobre este envío..."
-            rows={2}
-            className="flex-1 px-3 py-2 rounded-lg border border-[var(--border)] text-sm bg-[var(--background)] focus:outline-none focus:ring-2 focus:ring-[var(--foreground)] focus:ring-opacity-20 resize-none"
+      {/* Grilla de dos columnas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        
+        {/* Contenido Izquierdo */}
+        <div className="lg:col-span-2 space-y-6">
+          <ShipmentStatusCard
+            address={shipment.address}
+            originAddress={originAddress}
+            carrier={shipment.carrier}
+            estimatedDeliveryDate={shipment.estimatedDeliveryDate}
+            deliveryDate={shipment.deliveryDate}
+            nextStatus={nextStatus}
+            statusComment={statusComment}
+            setStatusComment={setStatusComment}
+            onAdvanceStatus={handleAdvanceStatus}
+            submittingStatus={submittingStatus}
           />
-          <button
-            onClick={handleAddComment}
-            disabled={submittingComment || !comment.trim()}
-            className="px-3 py-2 rounded-lg border border-[var(--border)] hover:bg-[var(--muted)] transition-colors disabled:opacity-30 shrink-0"
-            title="Agregar comentario"
-          >
-            <MessageSquarePlus className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
 
-      <div className="rounded-xl border border-[var(--border)] overflow-hidden">
-        <div className="text-sm font-semibold px-5 py-4 border-b border-[var(--border)]">
-          Historial
-        </div>
-        <div className="divide-y divide-[var(--border)]">
-          {tracking.length === 0 ? (
-            <div className="px-5 py-6 text-sm opacity-40 text-center">Sin movimientos todavía.</div>
-          ) : (
-            [...tracking].reverse().map((t) => (
-              <div key={t.id} className="px-5 py-3 flex items-start justify-between gap-4">
-                <div>
-                  <StatusBadge status={t.status} />
-                  {t.description && (
-                    <p className="text-sm mt-1.5">{t.description}</p>
-                  )}
-                </div>
-                <span className="text-xs opacity-50 whitespace-nowrap">
-                  {new Date(t.timestamp).toLocaleString("es-AR")}
-                </span>
-              </div>
-            ))
+          {/* Renderizado condicional: Solo se muestra el formulario si NO está entregado */}
+          {shipment.status !== "DELIVERED" && (
+            <AddCommentCard
+              comment={comment}
+              setComment={setComment}
+              onAddComment={handleAddComment}
+              submittingComment={submittingComment}
+            />
           )}
+
+          <ShipmentItemsList
+            items={shipment.items}
+            shippingCost={shipment.shippingCost}
+            discount={shipment.discount}
+          />
         </div>
+
+        {/* Contenido Derecho (Historial de Tracking) */}
+        <div className="lg:col-span-1 lg:sticky lg:top-6">
+          <ShipmentHistory tracking={tracking} />
+        </div>
+
       </div>
     </div>
   );
