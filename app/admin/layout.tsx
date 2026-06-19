@@ -1,9 +1,10 @@
+//app/admin/layout.tsx
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Truck } from "lucide-react";
+import { AlertTriangle, ArrowLeftRight, CreditCard, Truck } from "lucide-react";
 import { useTheme } from "../../components/theme-provider";
 import {
   Users,
@@ -26,6 +27,9 @@ const navItems = [
   { href: "/admin/resenas", label: "Reseñas", icon: MessageSquare },
   { href: "/admin/reportes", label: "Reportes", icon: Flag },
   { href: "/admin/envios", label: "Envíos", icon: Truck },
+  { href: "/admin/payments/dashboard", label: "Pagos", icon: CreditCard },
+  { href: "/admin/payments/transferencias", label: "Transferencias", icon: ArrowLeftRight },
+  { href: "/admin/payments/disputas", label: "Disputas", icon: AlertTriangle },
 ];
 
 export default function AdminLayout({
