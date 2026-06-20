@@ -3,9 +3,6 @@
 import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-const API_BASE = process.env.NEXT_PUBLIC_PAYMENTS_API_URL ?? ''
-const API_KEY  = process.env.NEXT_PUBLIC_PAYMENTS_API_KEY  ?? ''
-
 type Estado = 'APROBADO' | 'PENDIENTE' | 'RECHAZADO'
 type Tab    = 'TODOS' | Estado
 
@@ -48,9 +45,9 @@ export default function TransferenciasClient() {
     if (tab !== 'TODOS') params.set('estado', tab)
     if (q) params.set('q', q)
 
-    fetch(`${API_BASE}/api/admin/transferencias?${params}`, {
-      headers: { 'x-internal-api-key': API_KEY },
-    })
+    // Pega a la ruta proxy interna del Super Admin, NO directo a Payments.
+    // La API key (PAYMENTS_API_KEY) no es pública y se usa solo server-side.
+    fetch(`/api/admin/payments/transferencias?${params}`)
       .then(r => r.json())
       .then(d => { setData(d.items ?? []); setTotalPages(d.totalPages ?? 1) })
       .catch(() => setData([]))

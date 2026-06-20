@@ -27,7 +27,6 @@ const navItems = [
   { href: "/admin/resenas", label: "Reseñas", icon: MessageSquare },
   { href: "/admin/reportes", label: "Reportes", icon: Flag },
   { href: "/admin/envios", label: "Envíos", icon: Truck },
-  { href: "/admin/payments/dashboard", label: "Pagos", icon: CreditCard },
   { href: "/admin/payments/transferencias", label: "Transferencias", icon: ArrowLeftRight },
   { href: "/admin/payments/disputas", label: "Disputas", icon: AlertTriangle },
 ];

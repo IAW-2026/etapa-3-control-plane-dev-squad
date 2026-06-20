@@ -2,9 +2,6 @@
 // app/admin/payments/disputas/DisputasClient.tsx
 import { useEffect, useState } from 'react'
 
-const API_BASE = process.env.NEXT_PUBLIC_PAYMENTS_API_URL ?? ''
-const API_KEY  = process.env.NEXT_PUBLIC_PAYMENTS_API_KEY  ?? ''
-
 interface Disputa {
   id:      string
   pagoId:  string
@@ -27,9 +24,8 @@ export default function DisputasClient() {
   const [loading, setLoading] = useState(true)
 
   function cargar() {
-    fetch(`${API_BASE}/api/admin/stats`, {
-      headers: { 'x-internal-api-key': API_KEY },
-    })
+    // Pega a la ruta proxy interna del Super Admin, NO directo a Payments.
+    fetch('/api/admin/payments/stats')
       .then(r => r.json())
       .then(d => { setData(d.disputas ?? []); setLoading(false) })
       .catch(() => setLoading(false))
@@ -38,12 +34,9 @@ export default function DisputasClient() {
   useEffect(() => { cargar() }, [])
 
   async function cambiarEstado(id: string, estado: string) {
-    await fetch(`${API_BASE}/api/disputes/${id}`, {
+    await fetch(`/api/admin/payments/disputes/${id}`, {
       method:  'PATCH',
-      headers: {
-        'Content-Type':       'application/json',
-        'x-internal-api-key': API_KEY,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ estado }),
     })
     cargar()
