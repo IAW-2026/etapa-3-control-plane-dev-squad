@@ -5,8 +5,8 @@ import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { EnviosMobileList } from "../../../components/shipments/EnviosMobileList";
 import { EnviosDesktopTable } from "../../../components/shipments/EnviosDesktopTable";
 
-const API_KEY = process.env.NEXT_PUBLIC_LOGISTICS_API_KEY ?? "";
-const API_BASE = process.env.NEXT_PUBLIC_LOGISTICS_API_URL ?? "";
+const API_KEY = process.env.SHIPPING_API_KEY ?? "";
+const API_BASE = process.env.SHIPPING_APP_URL ?? "";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Pendiente",

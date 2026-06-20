@@ -10,8 +10,8 @@ import { ShipmentStatusCard } from "../../../../components/shipments/ShipmentSta
 import { AddCommentCard } from "../../../../components/shipments/AddCommentCard";
 import { Shipment, TrackingItem } from "../../../../components/shipments/types";
 
-const API_KEY = process.env.NEXT_PUBLIC_LOGISTICS_API_KEY ?? "";
-const API_BASE = process.env.NEXT_PUBLIC_LOGISTICS_API_URL ?? "";
+const API_KEY = process.env.SHIPPING_API_KEY ?? "";
+const API_BASE = process.env.SHIPPING_APP_URL ?? "";
 const ORDER = ["PENDING", "PREPARING", "IN_TRANSIT", "DELIVERED"];
 
 export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
