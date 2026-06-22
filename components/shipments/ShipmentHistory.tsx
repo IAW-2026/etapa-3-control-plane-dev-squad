@@ -19,14 +19,14 @@ export function ShipmentHistory({ tracking }: { tracking: TrackingItem[] }) {
           <div className="px-5 py-6 text-sm opacity-40 text-center">Sin movimientos todavía.</div>
         ) : (
           [...tracking].reverse().map((t) => (
-            <div key={t.id} className="px-5 py-3 flex items-start justify-between gap-4">
-              <div>
+            <div key={t.id} className="px-5 py-3 flex flex-col gap-1.5">
+              <div className="flex items-center justify-between gap-2">
                 <StatusBadge status={t.status} />
-                {t.description && <p className="text-sm mt-1.5">{t.description}</p>}
+                <span className="text-xs opacity-50 whitespace-nowrap">
+                  {new Date(t.timestamp).toLocaleString("es-AR")}
+                </span>
               </div>
-              <span className="text-xs opacity-50 whitespace-nowrap">
-                {new Date(t.timestamp).toLocaleString("es-AR")}
-              </span>
+              {t.description && <p className="text-sm opacity-80">{t.description}</p>}
             </div>
           ))
         )}

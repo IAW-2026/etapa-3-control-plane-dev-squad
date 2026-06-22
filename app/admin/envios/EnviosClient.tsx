@@ -5,9 +5,6 @@ import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { EnviosMobileList } from "../../../components/shipments/EnviosMobileList";
 import { EnviosDesktopTable } from "../../../components/shipments/EnviosDesktopTable";
 
-const API_KEY = process.env.SHIPPING_API_KEY ?? "";
-const API_BASE = process.env.SHIPPING_APP_URL ?? "";
-
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Pendiente",
   PREPARING: "En preparación",
@@ -70,9 +67,7 @@ export default function EnviosClient() {
       const params = new URLSearchParams({ page: String(page) });
       if (status) params.set("status", status);
 
-      const res = await fetch(`${API_BASE}/api/superadmin/shipments?${params}`, {
-        headers: { "x-api-key": API_KEY },
-      });
+      const res = await fetch(`/api/admin/shipments?${params}`);
 
       if (!res.ok) throw new Error();
       const data = await res.json();
@@ -98,7 +93,6 @@ export default function EnviosClient() {
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-        {/* Agregamos sm:w-64 para que no se estire en pantallas grandes */}
         <div className="relative w-full sm:w-64">
           <select
             value={status}
@@ -121,16 +115,15 @@ export default function EnviosClient() {
         <div className="p-12 text-center text-sm text-red-500 border border-border rounded-xl bg-background">{error}</div>
       ) : (
         <>
-          <EnviosMobileList 
-            shipments={shipments} 
-            StatusBadge={StatusBadge} 
-            DeliveryCell={DeliveryCell} 
+          <EnviosMobileList
+            shipments={shipments}
+            StatusBadge={StatusBadge}
+            DeliveryCell={DeliveryCell}
           />
-
-          <EnviosDesktopTable 
-            shipments={shipments} 
-            StatusBadge={StatusBadge} 
-            DeliveryCell={DeliveryCell} 
+          <EnviosDesktopTable
+            shipments={shipments}
+            StatusBadge={StatusBadge}
+            DeliveryCell={DeliveryCell}
           />
         </>
       )}

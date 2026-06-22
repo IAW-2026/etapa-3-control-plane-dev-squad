@@ -10,8 +10,6 @@ import { ShipmentStatusCard } from "../../../../components/shipments/ShipmentSta
 import { AddCommentCard } from "../../../../components/shipments/AddCommentCard";
 import { Shipment, TrackingItem } from "../../../../components/shipments/types";
 
-const API_KEY = process.env.SHIPPING_API_KEY ?? "";
-const API_BASE = process.env.SHIPPING_APP_URL ?? "";
 const ORDER = ["PENDING", "PREPARING", "IN_TRANSIT", "DELIVERED"];
 
 export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
@@ -31,12 +29,8 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
     setError(null);
     try {
       const [shipmentRes, trackingRes] = await Promise.all([
-        fetch(`${API_BASE}/api/superadmin/shipments/${orderId}`, {
-          headers: { "x-api-key": API_KEY },
-        }),
-        fetch(`${API_BASE}/api/superadmin/shipments/${orderId}/tracking`, {
-          headers: { "x-api-key": API_KEY },
-        }),
+        fetch(`/api/admin/shipments/${orderId}`),
+        fetch(`/api/admin/shipments/${orderId}/tracking`),
       ]);
 
       if (!shipmentRes.ok || !trackingRes.ok) throw new Error();
@@ -65,12 +59,9 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
     setSubmittingStatus(true);
     setActionError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/superadmin/shipments/${orderId}`, {
+      const res = await fetch(`/api/admin/shipments/${orderId}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": API_KEY,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: nextStatus,
           description: statusComment.trim(),
@@ -87,16 +78,13 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
   }
 
   async function handleAddComment() {
-    if (!comment.trim() || shipment?.status === "DELIVERED") return; // Protección extra en la función
+    if (!comment.trim() || shipment?.status === "DELIVERED") return;
     setSubmittingComment(true);
     setActionError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/superadmin/shipments/${orderId}`, {
+      const res = await fetch(`/api/admin/shipments/${orderId}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": API_KEY,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: comment.trim() }),
       });
       if (!res.ok) throw new Error();
@@ -141,10 +129,7 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
         </div>
       )}
 
-      {/* Grilla de dos columnas */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        
-        {/* Contenido Izquierdo */}
         <div className="lg:col-span-2 space-y-6">
           <ShipmentStatusCard
             address={shipment.address}
@@ -159,7 +144,6 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
             submittingStatus={submittingStatus}
           />
 
-          {/* Renderizado condicional: Solo se muestra el formulario si NO está entregado */}
           {shipment.status !== "DELIVERED" && (
             <AddCommentCard
               comment={comment}
@@ -176,11 +160,9 @@ export default function EnvioDetalleClient({ orderId }: { orderId: string }) {
           />
         </div>
 
-        {/* Contenido Derecho (Historial de Tracking) */}
         <div className="lg:col-span-1 lg:sticky lg:top-6">
           <ShipmentHistory tracking={tracking} />
         </div>
-
       </div>
     </div>
   );

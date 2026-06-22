@@ -16,10 +16,10 @@ export function ShipmentItemsList({
 }: {
   items: OrderItem[];
   shippingCost: number | null;
-  discount: number;
+  discount: number | null;
 }) {
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const total = subtotal + (shippingCost ?? 0) - discount;
+  const total = subtotal + (shippingCost ?? 0) - (discount ?? 0);
 
   return (
     <div className="rounded-xl border border-border overflow-hidden">
@@ -66,7 +66,7 @@ export function ShipmentItemsList({
         </div>
         <div className="flex justify-between text-sm">
           <span className="opacity-60">Descuento</span>
-          <span className="text-green-600">-${discount.toLocaleString("es-AR")}</span>
+          <span>-${(discount ?? 0).toLocaleString("es-AR")}</span>
         </div>
         <div className="flex justify-between text-sm font-semibold pt-2 border-t border-border">
           <span>Total</span>
