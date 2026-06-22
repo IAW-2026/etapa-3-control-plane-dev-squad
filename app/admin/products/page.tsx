@@ -3,9 +3,6 @@
 import { useState, useEffect } from "react";
 import { Search, Package, Filter, ChevronDown } from "lucide-react";
 
-const SELLER_API = process.env.NEXT_PUBLIC_SELLER_APP_URL;
-const API_KEY    = process.env.NEXT_PUBLIC_SUPERADMIN_KEY;
-
 interface Product {
   id: string; name: string; price: number; stock: number;
   brand: string; active: boolean; seller: string; totalSells: number;
@@ -37,19 +34,13 @@ export default function ProductsPage() {
   const [toggling, setToggling] = useState<string | null>(null);
 
   useEffect(() => {
-      console.log("[PRODUCTS] Fetching from:", `${SELLER_API}/api/admin/products`);
-    fetch(`${SELLER_API}/api/admin/products`, {
-      headers: { "X-Superadmin-Key": API_KEY! },
-    })
+    fetch("/api/admin/sellers/products")
       .then(async (r) => {
-      console.log("[PRODUCTS] Status:", r.status);
       const data = await r.json();
-      console.log("[PRODUCTS] Data:", data);
       if (!r.ok) throw new Error(data.error);
       setProducts(data);
     })
-    .catch((err) => {
-      console.error("[PRODUCTS] Error:", err);
+    .catch(() => {
       setError("No se pudieron cargar los productos");
     })
     .finally(() => setLoading(false));
@@ -58,13 +49,9 @@ export default function ProductsPage() {
   async function toggleProduct(id: string, active: boolean) {
     setToggling(id);
     try {
-      console.log("[PRODUCTS] Toggling product:", `${SELLER_API}/api/admin/products`);
-      const res = await fetch(`${SELLER_API}/api/admin/products`, {
+      const res = await fetch("/api/admin/sellers/products", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Superadmin-Key": API_KEY!,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, active: !active }),
       });
       if (!res.ok) throw new Error();
