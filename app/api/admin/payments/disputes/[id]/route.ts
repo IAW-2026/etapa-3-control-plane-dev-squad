@@ -3,13 +3,14 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const body = await req.json()
 
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_PAYMENTS_API_URL}/api/disputes/${params.id}`,
+      `${process.env.NEXT_PUBLIC_PAYMENTS_API_URL}/api/disputes/${id}`,
       {
         method: 'PATCH',
         headers: {
