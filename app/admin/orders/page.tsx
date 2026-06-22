@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Search, ShoppingBag, ChevronDown, Filter } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Search, ShoppingBag, Filter, ChevronDown } from "lucide-react";
 
-const mockOrders = [
-  { id: "ORD-001", user: "Juan Pérez", total: 125000, status: "PAID", items: 3, date: "2025-06-15" },
-  { id: "ORD-002", user: "María García", total: 89000, status: "PENDING", items: 1, date: "2025-06-14" },
-  { id: "ORD-003", user: "Carlos López", total: 210000, status: "SHIPPED", items: 2, date: "2025-06-13" },
-  { id: "ORD-004", user: "Ana Martínez", total: 56000, status: "DELIVERED", items: 1, date: "2025-06-12" },
-  { id: "ORD-005", user: "Pedro Rodríguez", total: 178000, status: "CANCELLED", items: 2, date: "2025-06-11" },
-];
+const PER_PAGE = 10;
+
+interface Order {
+  id: string
+  status: string
+  customer?: string
+  total?: number
+  createdAt?: string
+}
+
+interface Pagination {
+  page: number
+  limit: number
+}
 
 function StatusBadge({ status }: { status: string }) {
   return (
@@ -29,13 +36,50 @@ function formatCurrency(n: number) {
 }
 
 export default function OrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: PER_PAGE });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
-  const filtered = mockOrders.filter(
-    (o) =>
-      o.id.toLowerCase().includes(search.toLowerCase()) ||
-      o.user.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (search) params.set("search", search)
+    params.set("page", String(pagination.page))
+    params.set("limit", String(PER_PAGE))
+
+    fetch(`/api/admin/orders?${params.toString()}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error) throw new Error(d.error)
+        const list = Array.isArray(d.data) ? d.data : []
+        setOrders(list)
+        if (d.pagination) setPagination(d.pagination)
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [search, pagination.page])
+
+  const totalPages = Math.max(1, Math.ceil(orders.length / PER_PAGE))
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-4 border-[var(--foreground)] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="bg-[var(--muted)] border border-[var(--border)] rounded-xl p-6 text-center max-w-md">
+          <p className="font-medium mb-1">Error al cargar órdenes</p>
+          <p className="text-sm opacity-70">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -64,32 +108,49 @@ export default function OrdersPage() {
         </button>
       </div>
 
-      <div className="rounded-xl border border-[var(--border)] overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
-              <th className="text-left text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">Orden</th>
-              <th className="text-left text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">Cliente</th>
-              <th className="text-center text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">Items</th>
-              <th className="text-right text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">Total</th>
-              <th className="text-center text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">Estado</th>
-              <th className="text-right text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">Fecha</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--border)]">
-            {filtered.map((order) => (
-              <tr key={order.id} className="hover:bg-[var(--muted)] transition-colors">
-                <td className="px-5 py-4 text-sm font-medium">{order.id}</td>
-                <td className="px-5 py-4 text-sm">{order.user}</td>
-                <td className="px-5 py-4 text-center text-sm">{order.items}</td>
-                <td className="px-5 py-4 text-right text-sm font-semibold">{formatCurrency(order.total)}</td>
-                <td className="px-5 py-4 text-center"><StatusBadge status={order.status} /></td>
-                <td className="px-5 py-4 text-right text-sm opacity-60">{order.date}</td>
+      {orders.length === 0 ? (
+        <div className="rounded-xl border border-[var(--border)] p-12 text-center">
+          <ShoppingBag className="w-12 h-12 opacity-30 mx-auto mb-3" />
+          <p className="font-medium opacity-60">
+            {search
+              ? "No se encontraron órdenes con ese criterio"
+              : "No hay órdenes registradas"}
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-[var(--border)] overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
+                <th className="text-left text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">Orden</th>
+                <th className="text-left text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">Cliente</th>
+                <th className="text-right text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">Total</th>
+                <th className="text-center text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">Estado</th>
+                <th className="text-right text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">Fecha</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-[var(--border)]">
+              {orders.map((order) => (
+                <tr key={order.id} className="hover:bg-[var(--muted)] transition-colors">
+                  <td className="px-5 py-4 text-sm font-medium">{order.id}</td>
+                  <td className="px-5 py-4 text-sm">{order.customer || "—"}</td>
+                  <td className="px-5 py-4 text-right text-sm font-semibold">
+                    {order.total != null ? formatCurrency(order.total) : "—"}
+                  </td>
+                  <td className="px-5 py-4 text-center">
+                    <StatusBadge status={order.status} />
+                  </td>
+                  <td className="px-5 py-4 text-right text-sm opacity-60">
+                    {order.createdAt
+                      ? new Date(order.createdAt).toLocaleDateString("es-AR")
+                      : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
