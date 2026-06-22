@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Search, Users, ChevronDown, Filter } from "lucide-react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Users } from "lucide-react";
+import SearchInput from "../../../components/SearchInput";
+import FilterSelect from "../../../components/FilterSelect";
+import Pagination from "../../../components/Pagination";
+
+const PER_PAGE = 10;
 
 interface User {
   id: string;
@@ -13,29 +19,67 @@ interface User {
   createdAt?: string;
 }
 
-export default function UsuariosPage() {
+const roleOptions = [
+  { value: "", label: "Todos" },
+  { value: "admin", label: "Admin" },
+  { value: "seller", label: "Vendedor" },
+  { value: "user", label: "Usuario" },
+];
+
+const roleBadge: Record<string, string> = {
+  admin: "bg-red-100 text-red-700 border-red-200",
+  seller: "bg-blue-100 text-blue-700 border-blue-200",
+  user: "bg-green-100 text-green-700 border-green-200",
+};
+
+function UsuariosContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+
+  const search = searchParams.get("search") || "";
+  const roleFilter = searchParams.get("role") || "";
+  const page = Math.max(1, Number(searchParams.get("page")) || 1);
+
+  function setParam(key: string, value: string) {
+    const next = new URLSearchParams(searchParams.toString());
+    if (value) {
+      next.set(key, value);
+    } else {
+      next.delete(key);
+    }
+    if (key !== "page") next.delete("page");
+    router.replace(`/admin/usuarios?${next.toString()}`, { scroll: false });
+  }
 
   useEffect(() => {
-    fetch("/api/admin/sellers")
+    fetch("/api/admin/users")
       .then((r) => r.json())
       .then((d) => {
         if (d.error) throw new Error(d.error);
-        const list = Array.isArray(d) ? d : d.sellers ?? d.users ?? [];
+        const list = Array.isArray(d) ? d : d.users ?? d.data ?? d.sellers ?? [];
         setUsers(list);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = users.filter(
-    (u) =>
-      u.name?.toLowerCase().includes(search.toLowerCase()) ||
-      u.email?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = users.filter((u) => {
+    const matchesSearch =
+      !search ||
+      u.name?.toLowerCase().includes(search.toLowerCase());
+    const matchesRole =
+      !roleFilter ||
+      u.role?.toLowerCase() === roleFilter;
+    return matchesSearch && matchesRole;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
 
   if (loading) {
     return (
@@ -66,95 +110,115 @@ export default function UsuariosPage() {
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40" />
-          <input
-            type="text"
-            placeholder="Buscar usuario..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-[var(--border)] text-sm bg-[var(--background)] focus:outline-none focus:ring-2 focus:ring-[var(--foreground)] focus:ring-opacity-20 focus:border-[var(--foreground)]"
-          />
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border)] text-sm opacity-70 hover:opacity-100 transition-colors">
-          <Filter className="w-4 h-4" />
-          Filtros
-          <ChevronDown className="w-3 h-3" />
-        </button>
+        <SearchInput
+          placeholder="Buscar por nombre..."
+          value={search}
+          onChange={(v) => setParam("search", v)}
+        />
+        <FilterSelect
+          value={roleFilter}
+          onChange={(v) => setParam("role", v)}
+          options={roleOptions}
+        />
       </div>
 
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-[var(--border)] p-12 text-center">
           <Users className="w-12 h-12 opacity-30 mx-auto mb-3" />
           <p className="font-medium opacity-60">
-            {search
+            {search || roleFilter
               ? "No se encontraron usuarios con ese criterio"
               : "No hay usuarios registrados"}
           </p>
         </div>
       ) : (
-        <div className="rounded-xl border border-[var(--border)] overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
-                <th className="text-left text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
-                  Usuario
-                </th>
-                <th className="text-left text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
-                  Email
-                </th>
-                <th className="text-center text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
-                  Productos
-                </th>
-                <th className="text-center text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
-                  Ventas
-                </th>
-                <th className="text-right text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
-                  Acción
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border)]">
-              {filtered.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-[var(--muted)] transition-colors"
-                >
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[var(--foreground)] flex items-center justify-center text-[var(--background)] text-xs font-bold shrink-0">
-                        {user.name
-                          ?.split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .slice(0, 2)
-                          .toUpperCase() || "?"}
-                      </div>
-                      <span className="text-sm font-medium">
-                        {user.name || "Sin nombre"}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-sm opacity-60">
-                    {user.email}
-                  </td>
-                  <td className="px-5 py-4 text-center text-sm font-medium">
-                    {user._count?.products ?? "-"}
-                  </td>
-                  <td className="px-5 py-4 text-center text-sm font-medium">
-                    {user._count?.orders ?? "-"}
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    <button className="px-3 py-1.5 text-xs font-medium hover:bg-[var(--muted)] rounded-lg transition-colors">
-                      Ver perfil
-                    </button>
-                  </td>
+        <>
+          <div className="rounded-xl border border-[var(--border)] overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[var(--border)] bg-[var(--muted)]">
+                  <th className="text-left text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
+                    Usuario
+                  </th>
+                  <th className="text-left text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
+                    Email
+                  </th>
+                  <th className="text-center text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
+                    Rol
+                  </th>
+                  <th className="text-center text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
+                    Productos
+                  </th>
+                  <th className="text-center text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
+                    Ventas
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {paginated.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="hover:bg-[var(--muted)] transition-colors"
+                  >
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[var(--foreground)] flex items-center justify-center text-[var(--background)] text-xs font-bold shrink-0">
+                          {user.name
+                            ?.split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase() || "?"}
+                        </div>
+                        <span className="text-sm font-medium">
+                          {user.name || "Sin nombre"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-sm opacity-60">
+                      {user.email}
+                    </td>
+                    <td className="px-5 py-4 text-center">
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-medium border ${
+                          roleBadge[user.role?.toLowerCase()] ||
+                          "bg-gray-100 text-gray-600 border-gray-200"
+                        }`}
+                      >
+                        {user.role || "—"}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-center text-sm font-medium">
+                      {user._count?.products ?? "-"}
+                    </td>
+                    <td className="px-5 py-4 text-center text-sm font-medium">
+                      {user._count?.orders ?? "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <Pagination
+            page={safePage}
+            totalPages={totalPages}
+            onPageChange={(p) => setParam("page", String(p))}
+          />
+        </>
       )}
     </div>
+  );
+}
+
+export default function UsuariosPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-4 border-[var(--foreground)] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <UsuariosContent />
+    </Suspense>
   );
 }
