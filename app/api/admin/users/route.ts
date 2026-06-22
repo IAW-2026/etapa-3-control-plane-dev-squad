@@ -6,6 +6,7 @@ interface User {
   email: string
   image: string | null
   role: string
+  status?: string
   _count: { products: number; orders: number }
   createdAt: string
 }
@@ -41,6 +42,7 @@ export async function GET(req: NextRequest) {
         email: u.email || '',
         image: u.image || null,
         role: (u.role || '').toLowerCase() || 'user',
+        status: u.status || 'ACTIVE',
         _count: { products: u._count?.products ?? 0, orders: u._count?.orders ?? 0 },
         createdAt: u.createdAt || '',
       }))

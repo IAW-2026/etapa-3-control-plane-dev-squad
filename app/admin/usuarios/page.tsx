@@ -15,6 +15,7 @@ interface User {
   email: string;
   image?: string | null;
   role: string;
+  status?: string;
   _count?: { products: number; orders: number };
   createdAt?: string;
 }
@@ -32,6 +33,11 @@ const roleBadge: Record<string, string> = {
   user: "bg-green-100 text-green-700 border-green-200",
 };
 
+const statusBadge: Record<string, string> = {
+  ACTIVE: "bg-green-100 text-green-700 border-green-200",
+  SUSPENDED: "bg-red-100 text-red-700 border-red-200",
+};
+
 function UsuariosContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -39,6 +45,7 @@ function UsuariosContent() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const search = searchParams.get("search") || "";
   const roleFilter = searchParams.get("role") || "";
@@ -53,6 +60,29 @@ function UsuariosContent() {
     }
     if (key !== "page") next.delete("page");
     router.replace(`/admin/usuarios?${next.toString()}`, { scroll: false });
+  }
+
+  async function handleToggleStatus(user: User) {
+    const newStatus = user.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+    setTogglingId(user.id);
+    try {
+      const res = await fetch(
+        `/api/admin/users/${user.id}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+      if (!res.ok) throw new Error("Error al cambiar estado");
+      setUsers((prev) =>
+        prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u))
+      );
+    } catch {
+      alert("Error al cambiar el estado del usuario");
+    } finally {
+      setTogglingId(null);
+    }
   }
 
   useEffect(() => {
@@ -152,6 +182,9 @@ function UsuariosContent() {
                   <th className="text-center text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
                     Ventas
                   </th>
+                  <th className="text-center text-xs font-semibold uppercase tracking-wider px-5 py-3 opacity-60">
+                    Estado
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -193,6 +226,20 @@ function UsuariosContent() {
                     </td>
                     <td className="px-5 py-4 text-center text-sm font-medium">
                       {user._count?.orders ?? "-"}
+                    </td>
+                    <td className="px-5 py-4 text-center">
+                      <button
+                        onClick={() => handleToggleStatus(user)}
+                        disabled={togglingId === user.id}
+                        className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-medium border cursor-pointer transition-opacity disabled:opacity-50 ${
+                          statusBadge[user.status || "ACTIVE"] ||
+                          "bg-green-100 text-green-700 border-green-200"
+                        }`}
+                      >
+                        {togglingId === user.id
+                          ? "..."
+                          : user.status || "ACTIVE"}
+                      </button>
                     </td>
                   </tr>
                 ))}
