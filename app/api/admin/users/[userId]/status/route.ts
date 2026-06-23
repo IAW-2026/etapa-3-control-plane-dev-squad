@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const API_KEY = process.env.SUPERADMIN_KEY
+const SELLER_API = process.env.NEXT_PUBLIC_SELLER_APP_URL
+
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
@@ -14,24 +18,39 @@ export async function PATCH(
         { status: 400 }
       );
     }
+    const active = status === "ACTIVE";
 
-    if (role === "seller") {
-      // TODO: PATCH al Seller App
-      // const response = await fetch(
-      //   `${process.env.NEXT_PUBLIC_SELLER_APP_URL}/api/admin/vendedores/${userId}/status`,
-      //   {
-      //     method: "PATCH",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       "X-Superadmin-Key": process.env.NEXT_PUBLIC_SUPERADMIN_KEY!,
-      //     },
-      //     body: JSON.stringify({ status }),
-      //   }
-      // );
-      return NextResponse.json(
-        { error: "Funcionalidad no implementada para vendedores" },
-        { status: 501 }
-      );
+
+   if (role === "seller") {
+          const response = await fetch(
+      `${SELLER_API}/api/admin/vendedores`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Superadmin-Key": API_KEY!,
+        },
+        body: JSON.stringify({
+          id: userId,
+          active,
+        }),
+        cache: "no-store",
+      }
+    );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return NextResponse.json(
+          { error: data.error || "Error actualizando vendedor" },
+          { status: response.status }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        active: data.active,
+      });
     }
 
     const response = await fetch(
