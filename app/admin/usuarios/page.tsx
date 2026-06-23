@@ -22,7 +22,6 @@ interface User {
 
 const roleOptions = [
   { value: "", label: "Todos" },
-  { value: "admin", label: "Admin" },
   { value: "seller", label: "Vendedor" },
   { value: "user", label: "Usuario" },
 ];
