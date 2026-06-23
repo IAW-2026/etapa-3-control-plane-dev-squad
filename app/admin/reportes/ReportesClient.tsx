@@ -133,54 +133,64 @@ export default function ReportesClient() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
         <SearchInput
           placeholder="Buscar por motivo, usuario o reseña..."
           value={search}
           onChange={(v) => updateParams({ search: v })}
+          className="w-full sm:flex-1 sm:max-w-sm"
         />
-        <FilterSelect
-          value={resolvedFilter}
-          onChange={(v) => updateParams({ resolved: v })}
-          options={[
-            { value: '', label: 'Estado' },
-            { value: 'false', label: 'Pendientes' },
-            { value: 'true', label: 'Resueltos' },
-          ]}
-        />
-        <FilterSelect
-          value={rating}
-          onChange={(v) => updateParams({ rating: v })}
-          options={[
-            { value: '', label: 'Rating' },
-            { value: '5', label: '5 estrellas' },
-            { value: '4', label: '4 estrellas' },
-            { value: '3', label: '3 estrellas' },
-            { value: '2', label: '2 estrellas' },
-            { value: '1', label: '1 estrella' },
-          ]}
-        />
-        <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--muted)] hover:bg-[var(--muted-hover)] focus-within:ring-2 focus-within:ring-[var(--foreground)] focus-within:ring-opacity-20 transition-colors cursor-pointer">
-          <Calendar className="w-4 h-4 text-[var(--foreground)] opacity-40 shrink-0" />
-          <span className="text-xs text-[var(--foreground)] opacity-50 shrink-0">Desde</span>
-          <input
-            type="date"
-            value={fechaDesde}
-            onChange={(e) => updateParams({ fechaDesde: e.target.value })}
-            className="bg-transparent border-none outline-none text-sm cursor-pointer p-0 min-w-[130px]"
+
+        <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:gap-2">
+          <FilterSelect
+            value={resolvedFilter}
+            onChange={(v) => updateParams({ resolved: v })}
+            options={[
+              { value: '', label: 'Estado' },
+              { value: 'false', label: 'Pendientes' },
+              { value: 'true', label: 'Resueltos' },
+            ]}
+            className="sm:w-36"
+          />
+          <FilterSelect
+            value={rating}
+            onChange={(v) => updateParams({ rating: v })}
+            options={[
+              { value: '', label: 'Rating' },
+              { value: '5', label: '5 estrellas' },
+              { value: '4', label: '4 estrellas' },
+              { value: '3', label: '3 estrellas' },
+              { value: '2', label: '2 estrellas' },
+              { value: '1', label: '1 estrella' },
+            ]}
+            className="sm:w-36"
           />
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--muted)] hover:bg-[var(--muted-hover)] focus-within:ring-2 focus-within:ring-[var(--foreground)] focus-within:ring-opacity-20 transition-colors cursor-pointer">
-          <Calendar className="w-4 h-4 text-[var(--foreground)] opacity-40 shrink-0" />
-          <span className="text-xs text-[var(--foreground)] opacity-50 shrink-0">Hasta</span>
-          <input
-            type="date"
-            value={fechaHasta}
-            onChange={(e) => updateParams({ fechaHasta: e.target.value })}
-            className="bg-transparent border-none outline-none text-sm cursor-pointer p-0 min-w-[130px]"
-          />
+
+        <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:gap-2">
+          <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--muted)] hover:bg-[var(--muted-hover)] focus-within:ring-2 focus-within:ring-[var(--foreground)] focus-within:ring-opacity-20 transition-colors cursor-pointer w-full sm:w-auto">
+            <Calendar className="w-4 h-4 text-[var(--foreground)] opacity-40 shrink-0" />
+            <span className="text-xs text-[var(--foreground)] opacity-50 shrink-0">Desde</span>
+            <input
+              type="date"
+              value={fechaDesde}
+              onChange={(e) => updateParams({ fechaDesde: e.target.value })}
+              className="bg-transparent border-none outline-none text-sm cursor-pointer p-0 min-w-0 flex-1"
+            />
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--muted)] hover:bg-[var(--muted-hover)] focus-within:ring-2 focus-within:ring-[var(--foreground)] focus-within:ring-opacity-20 transition-colors cursor-pointer w-full sm:w-auto">
+            <Calendar className="w-4 h-4 text-[var(--foreground)] opacity-40 shrink-0" />
+            <span className="text-xs text-[var(--foreground)] opacity-50 shrink-0">Hasta</span>
+            <input
+              type="date"
+              value={fechaHasta}
+              onChange={(e) => updateParams({ fechaHasta: e.target.value })}
+              className="bg-transparent border-none outline-none text-sm cursor-pointer p-0 min-w-0 flex-1"
+            />
+          </div>
         </div>
-        <span className="text-xs whitespace-nowrap opacity-50">
+
+        <span className="text-xs whitespace-nowrap opacity-50 w-full sm:w-auto">
           {total} reporte{total !== 1 ? 's' : ''}
         </span>
       </div>

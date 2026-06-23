@@ -11,8 +11,9 @@ export async function GET(req: NextRequest) {
     const rating = url.searchParams.get('rating') ? Number(url.searchParams.get('rating')) : undefined
     const fechaDesde = url.searchParams.get('fechaDesde') || undefined
     const fechaHasta = url.searchParams.get('fechaHasta') || undefined
+    const estado = url.searchParams.get('estado') || undefined
 
-    const result = await getAllReviews({ page, limit, search, tipo, rating, fechaDesde, fechaHasta })
+    const result = await getAllReviews({ page, limit, search, tipo, rating, fechaDesde, fechaHasta, estado })
     return NextResponse.json(result)
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error interno'

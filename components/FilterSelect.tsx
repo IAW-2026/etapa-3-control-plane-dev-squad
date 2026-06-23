@@ -12,9 +12,10 @@ interface Props {
   value: string
   onChange: (value: string) => void
   options: Option[]
+  className?: string
 }
 
-export default function FilterSelect({ value, onChange, options }: Props) {
+export default function FilterSelect({ value, onChange, options, className }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -31,7 +32,7 @@ export default function FilterSelect({ value, onChange, options }: Props) {
   const selected = options.find((o) => o.value === value)
 
   return (
-    <div className="relative w-36" ref={ref}>
+    <div className={`relative w-auto sm:w-36 ${className ?? ''}`} ref={ref}>
       <button
         type="button"
         onClick={() => setOpen(!open)}

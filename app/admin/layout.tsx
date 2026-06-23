@@ -1,11 +1,11 @@
 //app/admin/layout.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
-import { AlertTriangle, ArrowLeftRight, CreditCard, Truck } from "lucide-react";
+import { AlertTriangle, ArrowLeftRight, CreditCard, Truck, PanelLeft } from "lucide-react";
 import { useTheme } from "../../components/theme-provider";
 import {
   Users,
@@ -39,16 +39,31 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const { user } = useUser();
   const { signOut } = useClerk();
 
+  const currentLabel = navItems.find((i) => i.href === pathname)?.label ?? "Admin";
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   return (
     <div className="flex h-screen bg-[var(--background)]">
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
       <aside
         className={`${
           collapsed ? "w-16" : "w-64"
-        } bg-[var(--foreground)] text-[var(--background)] flex flex-col transition-all duration-200 shrink-0`}
+        } bg-[var(--foreground)] text-[var(--background)] flex flex-col transition-all duration-200 shrink-0
+        fixed inset-y-0 left-0 z-40 md:relative md:z-auto
+        ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
         <div className="flex items-center gap-3 px-4 h-16 border-b border-[var(--sidebar-border)]">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--background)] shrink-0">
@@ -128,7 +143,17 @@ export default function AdminLayout({
       </aside>
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-6">{children}</div>
+        <header className="fixed top-0 left-0 right-0 z-20 md:hidden flex items-center gap-3 h-14 px-4 bg-[var(--background)] border-b border-[var(--border)] shadow-sm">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-2 -ml-2 rounded-lg hover:bg-[var(--muted)] transition-colors cursor-pointer"
+            aria-label="Abrir menú"
+          >
+            <PanelLeft className="w-5 h-5 text-[var(--foreground)]" />
+          </button>
+          <span className="text-sm font-medium opacity-80">{currentLabel}</span>
+        </header>
+        <div className="flex-1 overflow-y-auto px-6 pb-6 pt-14 md:pt-6">{children}</div>
       </main>
     </div>
   );

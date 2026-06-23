@@ -132,7 +132,7 @@ function UsuariosContent() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold">Usuarios</h1>
+        <h1 className="text-xl font-bold hidden md:block">Usuarios</h1>
         <p className="text-sm opacity-60 mt-1">
           Gestiona los usuarios registrados en la plataforma
         </p>

@@ -140,7 +140,7 @@ export default function OrdersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold">Ordenes</h1>
+        <h1 className="text-xl font-bold hidden md:block">Ordenes</h1>
         <p className="text-sm opacity-60 mt-1">
           Administra las órdenes de compra del marketplace
         </p>

@@ -75,7 +75,7 @@ export default function ProductsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold">Productos</h1>
+        <h1 className="text-xl font-bold hidden md:block">Productos</h1>
         <p className="text-sm opacity-60 mt-1">
           Catálogo completo de zapatillas del marketplace
         </p>
