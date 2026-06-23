@@ -8,7 +8,7 @@ const PER_PAGE = 10;
 interface Order {
   id: string
   status: string
-  customer?: string
+  receiverName?: string
   total?: number
   createdAt?: string
 }
@@ -133,7 +133,7 @@ export default function OrdersPage() {
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-[var(--muted)] transition-colors">
                   <td className="px-5 py-4 text-sm font-medium">{order.id}</td>
-                  <td className="px-5 py-4 text-sm">{order.customer || "—"}</td>
+                  <td className="px-5 py-4 text-sm">{order.receiverName || "—"}</td>
                   <td className="px-5 py-4 text-right text-sm font-semibold">
                     {order.total != null ? formatCurrency(order.total) : "—"}
                   </td>

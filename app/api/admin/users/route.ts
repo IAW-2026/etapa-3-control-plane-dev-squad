@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       const raw = Array.isArray(body) ? body : body.users ?? body.data ?? []
       buyers = raw.map((u: any) => ({
         id: u.id,
-        name: u.name || '',
+        name: [u.firstName, u.lastName].filter(Boolean).join(' '),
         email: u.email || '',
         image: u.image || null,
         role: (u.role || '').toLowerCase() || 'user',
