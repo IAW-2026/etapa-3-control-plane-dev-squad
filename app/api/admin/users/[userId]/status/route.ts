@@ -6,12 +6,31 @@ export async function PATCH(
 ) {
   try {
     const { userId } = await params;
-    const { status } = await req.json();
+    const { status, role } = await req.json();
 
     if (!status || !["ACTIVE", "SUSPENDED"].includes(status)) {
       return NextResponse.json(
         { error: "Status must be ACTIVE or SUSPENDED" },
         { status: 400 }
+      );
+    }
+
+    if (role === "seller") {
+      // TODO: PATCH al Seller App
+      // const response = await fetch(
+      //   `${process.env.NEXT_PUBLIC_SELLER_APP_URL}/api/admin/vendedores/${userId}/status`,
+      //   {
+      //     method: "PATCH",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       "X-Superadmin-Key": process.env.NEXT_PUBLIC_SUPERADMIN_KEY!,
+      //     },
+      //     body: JSON.stringify({ status }),
+      //   }
+      // );
+      return NextResponse.json(
+        { error: "Funcionalidad no implementada para vendedores" },
+        { status: 501 }
       );
     }
 
@@ -21,7 +40,7 @@ export async function PATCH(
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": "buyer-dev-squad",
+          "buyer-key": "buyer-dev-squad",
         },
         body: JSON.stringify({ status }),
       }

@@ -71,7 +71,7 @@ function UsuariosContent() {
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({ status: newStatus, role: user.role }),
         }
       );
       if (!res.ok) throw new Error("Error al cambiar estado");
