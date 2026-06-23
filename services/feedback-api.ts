@@ -63,6 +63,12 @@ export interface Report {
   comentarioAdmin?: string
 }
 
+export interface UpdateReviewInput {
+  rating?: number
+  comentario?: string
+  estado?: string
+}
+
 export interface GetAllReviewsParams {
   page?: number
   limit?: number
@@ -71,6 +77,7 @@ export interface GetAllReviewsParams {
   rating?: number
   fechaDesde?: string
   fechaHasta?: string
+  estado?: string
 }
 
 export function getAllReviews(params?: GetAllReviewsParams) {
@@ -82,7 +89,15 @@ export function getAllReviews(params?: GetAllReviewsParams) {
   if (params?.rating) query.set('rating', String(params.rating))
   if (params?.fechaDesde) query.set('fechaDesde', params.fechaDesde)
   if (params?.fechaHasta) query.set('fechaHasta', params.fechaHasta)
+  if (params?.estado) query.set('estado', params.estado)
   return fetchApi<PaginatedResponse<Review>>(`/api/reviews?${query}`)
+}
+
+export function updateReview(id: string, input: UpdateReviewInput) {
+  return fetchApi<Review>(`/api/reviews/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  })
 }
 
 export interface GetAllReportsParams {

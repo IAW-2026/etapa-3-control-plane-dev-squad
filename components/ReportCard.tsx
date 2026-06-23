@@ -54,7 +54,7 @@ export default function ReportCard({ report, onResolve }: Props) {
           : 'border-red-500/30 bg-red-500/5'
       }`}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="flex-1 min-w-0 space-y-2">
           <div className="flex items-center gap-2">
             {!report.resuelto && (
@@ -90,10 +90,10 @@ export default function ReportCard({ report, onResolve }: Props) {
           )}
         </div>
         {!report.resuelto && (
-          <div className="shrink-0 flex gap-2">
+          <div className="shrink-0 flex gap-2 w-full sm:w-auto sm:self-auto">
             <button
               onClick={handleAIOpinion}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                 aiExpanded
                   ? 'bg-blue-600 text-white'
                   : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -104,7 +104,7 @@ export default function ReportCard({ report, onResolve }: Props) {
             </button>
             <button
               onClick={() => onResolve(report)}
-              className="flex items-center gap-2 px-4 py-2 bg-[var(--foreground)] text-[var(--background)] text-sm font-medium rounded-lg hover:opacity-80 transition-opacity cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-[var(--foreground)] text-[var(--background)] text-sm font-medium rounded-lg hover:opacity-80 transition-opacity cursor-pointer"
             >
               <ShieldCheck className="w-4 h-4" />
               Resolver

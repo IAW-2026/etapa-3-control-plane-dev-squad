@@ -25,7 +25,7 @@ export default function ResolveModal({
 }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-6 w-full max-w-md mx-4 shadow-2xl" role="dialog" aria-modal="true">
+      <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-4 sm:p-6 w-full max-w-md mx-4 shadow-2xl max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">Resolver reporte</h2>
           <button

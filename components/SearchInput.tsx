@@ -7,9 +7,10 @@ interface Props {
   placeholder: string
   value: string
   onChange: (value: string) => void
+  className?: string
 }
 
-export default function SearchInput({ placeholder, value, onChange }: Props) {
+export default function SearchInput({ placeholder, value, onChange, className }: Props) {
   const [local, setLocal] = useState(value)
   const lastSent = useRef(value)
 
@@ -31,7 +32,7 @@ export default function SearchInput({ placeholder, value, onChange }: Props) {
   }, [local, onChange])
 
   return (
-    <div className="relative flex-1 max-w-sm">
+    <div className={`relative flex-1 max-w-sm ${className ?? ''}`}>
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--foreground)] opacity-30 pointer-events-none" />
       <input
         type="text"
