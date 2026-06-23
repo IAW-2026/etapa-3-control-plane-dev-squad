@@ -1,5 +1,5 @@
 type OrderItem = {
-  id: number;
+  id: string | number;
   name: string;
   price: number;
   quantity: number;
