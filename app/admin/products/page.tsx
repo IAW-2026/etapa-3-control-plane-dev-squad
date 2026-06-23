@@ -32,6 +32,7 @@ export default function ProductsPage() {
   const [error, setError]       = useState<string | null>(null);
   const [search, setSearch]     = useState("");
   const [toggling, setToggling] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
 
   useEffect(() => {
     fetch("/api/admin/sellers/products")
@@ -65,12 +66,19 @@ export default function ProductsPage() {
     }
   }
 
-  const filtered = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.seller.toLowerCase().includes(search.toLowerCase()) ||
-      p.brand.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = products.filter((p) => {
+  const matchesSearch =
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.seller.toLowerCase().includes(search.toLowerCase()) ||
+    p.brand.toLowerCase().includes(search.toLowerCase());
+
+  const matchesStatus =
+    statusFilter === "all" ||
+    (statusFilter === "active" && p.active) ||
+    (statusFilter === "inactive" && !p.active);
+
+  return matchesSearch && matchesStatus;
+});
 
   return (
     <div className="space-y-6">
@@ -98,11 +106,22 @@ export default function ProductsPage() {
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-[var(--border)] text-sm bg-[var(--background)] focus:outline-none focus:ring-2 focus:ring-[var(--foreground)] focus:ring-opacity-20 focus:border-[var(--foreground)]"
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border)] text-sm opacity-70 hover:opacity-100 transition-colors">
-          <Filter className="w-4 h-4" />
-          Filtros
-          <ChevronDown className="w-3 h-3" />
-        </button>
+        <div className="relative">
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40" />
+          <select
+            value={statusFilter}
+            onChange={(e) =>
+              setStatusFilter(
+                e.target.value as "all" | "active" | "inactive"
+              )
+            }
+            className="pl-10 pr-8 py-2 rounded-lg border border-[var(--border)] text-sm bg-[var(--background)]"
+          >
+            <option value="all">Todos</option>
+            <option value="active">Activos</option>
+            <option value="inactive">Desactivados</option>
+          </select>
+        </div>
       </div>
 
       <div className="rounded-xl border border-[var(--border)] overflow-hidden">

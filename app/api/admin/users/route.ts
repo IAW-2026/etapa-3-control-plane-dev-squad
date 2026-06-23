@@ -77,14 +77,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    console.log(
-  sellers.map(s => ({
-    id: s.id,
-    name: s.name,
-    status: s.status
-  }))
-);
-
     return NextResponse.json(all)
   } catch {
     return NextResponse.json({ error: 'Error al obtener usuarios' }, { status: 502 })
