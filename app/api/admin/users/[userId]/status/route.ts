@@ -40,7 +40,7 @@ export async function PATCH(
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "buyer-key": "buyer-dev-squad",
+          'buyer-key': process.env.BUYER_API_KEY || '',
         },
         body: JSON.stringify({ status }),
       }
