@@ -58,6 +58,7 @@ export async function GET(req: NextRequest) {
         email: s.email || '',
         image: null,
         role: 'seller',
+        status: s.active ? 'ACTIVE' : 'SUSPENDED',
         _count: { products: s.totalProducts ?? s._count?.products ?? 0, orders: s.totalSells ?? s._count?.orders ?? 0 },
         createdAt: s.createdAt || '',
       }))
@@ -75,6 +76,14 @@ export async function GET(req: NextRequest) {
         all.push(u)
       }
     }
+
+    console.log(
+  sellers.map(s => ({
+    id: s.id,
+    name: s.name,
+    status: s.status
+  }))
+);
 
     return NextResponse.json(all)
   } catch {
