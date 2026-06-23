@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
       fetch(`${process.env.BUYER_API_URL}/api/admin/users${searchParams ? `?${searchParams}` : ''}`, {
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': process.env.BUYER_API_KEY || '',
+          'buyer-key': process.env.BUYER_API_KEY || '',
           cookie,
         },
         cache: 'no-store',
