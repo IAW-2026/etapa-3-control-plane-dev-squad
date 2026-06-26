@@ -44,9 +44,8 @@ export default function DisputasClient() {
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: 'Error desconocido' }))
       alert(`Error al actualizar: ${err.error ?? res.statusText}`)
+      cargar()
     }
-
-    cargar()
   }
 
   const abiertas  = data.filter(d => d.estado === 'ABIERTA').length
