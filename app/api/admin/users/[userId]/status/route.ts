@@ -31,6 +31,7 @@ export async function PATCH(
             "X-Superadmin-Key": API_KEY!,
           },
           body: JSON.stringify({
+            id: clerkId,
             clerkId,
             active,
           }),
