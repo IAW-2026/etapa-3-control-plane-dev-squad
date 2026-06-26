@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_PAYMENTS_API_URL}/api/admin/stats`, {
+    const base = process.env.NEXT_PUBLIC_PAYMENTS_API_URL!.replace(/\/+$/, '')
+    const res = await fetch(`${base}/api/admin/stats`, {
       headers: { 'x-api-key': process.env.PAYMENTS_API_KEY! },
       cache: 'no-store',
     })

@@ -24,7 +24,6 @@ export default function DisputasClient() {
   const [loading, setLoading] = useState(true)
 
   function cargar() {
-    // Pega a la ruta proxy interna del Super Admin, NO directo a Payments.
     fetch('/api/admin/payments/stats')
       .then(r => r.json())
       .then(d => { setData(d.disputas ?? []); setLoading(false) })
@@ -34,11 +33,19 @@ export default function DisputasClient() {
   useEffect(() => { cargar() }, [])
 
   async function cambiarEstado(id: string, estado: string) {
-    await fetch(`/api/admin/payments/disputes/${id}`, {
+    setData(prev => prev.map(d => d.id === id ? { ...d, estado: estado as Disputa['estado'] } : d))
+
+    const res = await fetch(`/api/admin/payments/disputes/${id}`, {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ estado }),
     })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Error desconocido' }))
+      alert(`Error al actualizar: ${err.error ?? res.statusText}`)
+    }
+
     cargar()
   }
 

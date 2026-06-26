@@ -9,8 +9,9 @@ export async function PATCH(
   const body = await req.json()
 
   try {
+    const base = process.env.NEXT_PUBLIC_PAYMENTS_API_URL!.replace(/\/+$/, '')
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_PAYMENTS_API_URL}/api/disputes/${id}`,
+      `${base}/api/disputes/${id}`,
       {
         method: 'PATCH',
         headers: {
