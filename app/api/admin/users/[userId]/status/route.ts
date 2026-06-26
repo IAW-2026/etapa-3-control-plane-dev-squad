@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_KEY = process.env.SUPERADMIN_KEY
+const API_KEY = process.env.NEXT_PUBLIC_SUPERADMIN_KEY
 const SELLER_API = process.env.NEXT_PUBLIC_SELLER_APP_URL
-
+const BUYER_API = process.env.BUYER_API_URL
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const { userId } = await params;
+    const clerkId = (await params).userId;
     const { status, role } = await req.json();
+    const cookie = req.headers.get("cookie") || "";
 
     if (!status || !["ACTIVE", "SUSPENDED"].includes(status)) {
       return NextResponse.json(
@@ -18,25 +19,24 @@ export async function PATCH(
         { status: 400 }
       );
     }
-    const active = status === "ACTIVE";
 
-
-   if (role === "seller") {
-          const response = await fetch(
-      `${SELLER_API}/api/admin/vendedores`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Superadmin-Key": API_KEY!,
-        },
-        body: JSON.stringify({
-          id: userId,
-          active,
-        }),
-        cache: "no-store",
-      }
-    );
+    if (role === "seller") {
+      const active = status === "ACTIVE";
+      const response = await fetch(
+        `${SELLER_API}/api/admin/vendedores`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Superadmin-Key": API_KEY!,
+          },
+          body: JSON.stringify({
+            clerkId,
+            active,
+          }),
+          cache: "no-store",
+        }
+      );
 
       const data = await response.json();
 
@@ -54,12 +54,13 @@ export async function PATCH(
     }
 
     const response = await fetch(
-      `https://zapasya.vercel.app/api/admin/users/${userId}/status`,
+      `${BUYER_API}/api/admin/users/${clerkId}/status`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          'buyer-key': process.env.BUYER_API_KEY || '',
+          "buyer-key": process.env.BUYER_API_KEY || "",
+          cookie,
         },
         body: JSON.stringify({ status }),
       }

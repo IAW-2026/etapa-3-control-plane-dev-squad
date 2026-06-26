@@ -11,6 +11,7 @@ const PER_PAGE = 10;
 
 interface User {
   id: string;
+  clerkId?: string;
   name: string;
   email: string;
   image?: string | null;
@@ -66,7 +67,7 @@ function UsuariosContent() {
     setTogglingId(user.id);
     try {
       const res = await fetch(
-        `/api/admin/users/${user.id}/status`,
+        `/api/admin/users/${user.clerkId || user.id}/status`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

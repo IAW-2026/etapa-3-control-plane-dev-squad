@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 interface User {
   id: string
+  clerkId?: string
   name: string
   email: string
   image: string | null
@@ -38,6 +39,7 @@ export async function GET(req: NextRequest) {
       const raw = Array.isArray(body) ? body : body.users ?? body.data ?? []
       buyers = raw.map((u: any) => ({
         id: u.id,
+        clerkId: u.clerkId || u.id,
         name: [u.firstName, u.lastName].filter(Boolean).join(' '),
         email: u.email || '',
         image: u.image || null,
@@ -54,6 +56,7 @@ export async function GET(req: NextRequest) {
       const raw = Array.isArray(body) ? body : body.sellers ?? body.data ?? []
       sellers = raw.map((s: any) => ({
         id: s.id,
+        clerkId: s.clerkId || s.id,
         name: s.name || '',
         email: s.email || '',
         image: null,
